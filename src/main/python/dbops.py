@@ -3,14 +3,14 @@ import mysql.connector
 
 conn = mysql.connector.connect(host="localhost", port=3306, user="root", passwd="")
 
-def db_create_db(conn):
+def create_db(conn):
     mycursor = conn.cursor()
     mycursor.execute("CREATE DATABASE IF NOT EXISTS db_notes")
 
 #invoke the function
 #db_create_db(conn)
-def db_create_table(conn):
-    db_create_db(conn)
+def create_table(conn):
+    create_db(conn)
     conn.database = "db_notes"
     mycursor = conn.cursor()
     query = "CREATE TABLE IF NOT EXISTS tb_notes (" \
@@ -22,7 +22,7 @@ def db_create_table(conn):
 
 # invoking the function
 #db_create_table(conn)
-def db_insert_note(conn, title, note):
+def insert_note(conn, title, note):
     conn.database = "db_notes"
     mycursor = conn.cursor()
     query = "INSERT INTO tb_notes (user_id, title, note) VALUES (1, %s, %s)"
@@ -41,7 +41,7 @@ records = [
 
 #for v in records:
     #db_insert_note(conn, v[0], v[1]) # invoke function
-def db_select_all_notes(conn):
+def select_all_notes(conn):
     conn.database = "db_notes"
     query = "SELECT * from tb_notes"
     mycursor = conn.cursor()
@@ -49,7 +49,7 @@ def db_select_all_notes(conn):
     return mycursor.fetchall()
 
 
-def db_select_specific_note(conn, note_id):
+def select_specific_note(conn, note_id):
     conn.database = "db_notes"
     mycursor = conn.cursor()
     mycursor.execute("SELECT title, note FROM tb_notes WHERE note_id = " + str(note_id))
