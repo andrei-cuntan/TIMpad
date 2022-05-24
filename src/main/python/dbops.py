@@ -1,14 +1,12 @@
-
 import mysql.connector
-
 conn = mysql.connector.connect(host="localhost", port=3306, user="root", passwd="")
+
 
 def create_db(conn):
     mycursor = conn.cursor()
     mycursor.execute("CREATE DATABASE IF NOT EXISTS db_notes")
 
-#invoke the function
-#db_create_db(conn)
+
 def create_table(conn):
     create_db(conn)
     conn.database = "db_notes"
@@ -20,8 +18,6 @@ def create_table(conn):
     mycursor.execute(query)
 
 
-# invoking the function
-#db_create_table(conn)
 def insert_note(conn, title, note):
     conn.database = "db_notes"
     mycursor = conn.cursor()
@@ -31,13 +27,15 @@ def insert_note(conn, title, note):
     conn.commit()
     return mycursor.lastrowid
 
-records = [
-        ('My first title', 'This is my first awesome note'),
-        ('My second title', 'This is my second awesome note'),
-        ('My third title', 'This is my third awesome note'),
-        ('My fourth title', 'This is my fourth awesome note'),
-        ('My fifth title', 'This is my fifth awesome note')
-    ]
+
+def update_note(conn, title, note, note_id, date):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    query = "UPDATE tb_notes SET title = %s, note = %s, timestamp = %s WHERE note_id = %s"
+    val = (title, note, date, note_id)
+    mycursor.execute(query, val)
+    conn.commit()
+
 
 def select_all_notes(conn):
     conn.database = "db_notes"
