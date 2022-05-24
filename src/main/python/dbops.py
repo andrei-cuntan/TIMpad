@@ -39,8 +39,6 @@ records = [
         ('My fifth title', 'This is my fifth awesome note')
     ]
 
-#for v in records:
-    #db_insert_note(conn, v[0], v[1]) # invoke function
 def select_all_notes(conn):
     conn.database = "db_notes"
     query = "SELECT * from tb_notes"
@@ -52,5 +50,5 @@ def select_all_notes(conn):
 def select_specific_note(conn, note_id):
     conn.database = "db_notes"
     mycursor = conn.cursor()
-    mycursor.execute("SELECT title, note FROM tb_notes WHERE note_id = " + str(note_id))
+    mycursor.execute("SELECT title, note , note_id FROM tb_notes WHERE note_id = " + str(note_id))
     return mycursor.fetchone()

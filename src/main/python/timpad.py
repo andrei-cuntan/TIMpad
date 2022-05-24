@@ -12,15 +12,11 @@ greeting.pack()
 
 uiops.title_box.pack()
 uiops.text_box.pack()
-list_box = tk.Listbox()
-list_box.pack()
-notelist = dbops.select_all_notes(dbops.conn)
-for note in notelist:
-    print(note)
-    list_box.insert(note[0], note[2])
+uiops.list_box.pack()
+uiops.update_list()
 # buttons
 add = tk.Button(text="Add", command=uiops.process_text)
-edit = tk.Button(text="Edit")
+edit = tk.Button(text="Edit", command=uiops.add_text)
 delete = tk.Button(text="Delete", command=uiops.delete_text)
 add.pack()
 edit.pack()
