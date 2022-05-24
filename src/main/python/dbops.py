@@ -44,6 +44,13 @@ def select_all_notes(conn):
     mycursor.execute(query)
     return mycursor.fetchall()
 
+def delete_note(conn, note_id):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    query = "DELETE FROM tb_notes WHERE note_id = %s"
+    adr = (note_id,)
+    mycursor.execute(query, adr)
+    conn.commit()
 
 def select_specific_note(conn, note_id):
     conn.database = "db_notes"
