@@ -29,19 +29,19 @@ def create_users(conn):
     mycursor.execute(query)
 
 
-def insert_note(conn, title, note):
+def insert_note(conn, title, note, idx):
     conn.database = "db_notes"
     mycursor = conn.cursor()
-    query = "INSERT INTO tb_notes (user_id, title, note) VALUES (1, %s, %s)"
-    val = (title, note)
+    query = "INSERT INTO tb_notes (user_id, title, note) VALUES (%d, %s, %s)"
+    val = (idx, title, note)
     mycursor.execute(query, val)
     conn.commit()
     return mycursor.lastrowid
-def insert_user(conn, user, pw):
+def insert_user(conn, user, pw, type):
     conn.database = "db_notes"
     mycursor = conn.cursor()
-    query = "INSERT INTO users (id, user, type, password) VALUES (1, %s, %s, %s)"
-    val = (user, 'admin', bcrypt.hashpw(pw.encode('utf-8'), bcrypt.gensalt()))
+    query = "INSERT INTO users (user, type, password) VALUES (%s, %s, %s)"
+    val = (user, type, bcrypt.hashpw(pw.encode('utf-8'), bcrypt.gensalt()))
     mycursor.execute(query, val)
     conn.commit()
     return mycursor.lastrowid

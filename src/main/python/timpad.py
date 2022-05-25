@@ -79,7 +79,7 @@ def add_note():
     title = title_box.get()
     contents = text_box.get("1.0", tk.END)
     if title != "":
-        dbops.insert_note(dbops.conn, title, contents)
+        dbops.insert_note(dbops.conn, title, contents, dbops.get_user_type(dbops.conn, auth)[0])
         update_list(dbops.select_all_notes(dbops.conn))
         status.config(text="Note added!")
     else:
@@ -112,6 +112,17 @@ def check_user():
         auth = user
     else:
         login_msg.config(text="Incorrect credentials!")
+def add_user():
+    user = login_user_box.get()
+    pw = login_pw_box.get()
+    global auth
+    if var1.get():
+        type = "admin"
+    else:
+        type = "user"
+    dbops.insert_user(dbops.conn, user, pw, type)
+    login_window.destroy()
+    auth = user
 
 login_window = tk.Tk()
 user_frame = tk.Frame().pack(side=tk.TOP)
@@ -128,6 +139,11 @@ login_pw_box = tk.Entry(master=pw_frame, width=20)
 login_pw_box.pack(side=tk.LEFT)
 submit = tk.Button(login_window, text="Login", command=check_user)
 submit.pack()
+register = tk.Button(login_window, text="Register", command=add_user)
+register.pack()
+var1 = tk.IntVar()
+c1 = tk.Checkbutton(login_window, text='Admin register',variable=var1, onvalue=1, offvalue=0,)
+c1.pack()
 out = tk.Button(login_window, text="Quit", command=login_window.destroy)
 out.pack(side=tk.BOTTOM)
 login_window.mainloop()
@@ -162,7 +178,7 @@ if auth != "":
     delete = tk.Button(master=list_frame, text="Delete", width=8, command=delete_note)
     delete.pack(side=tk.LEFT)
     print(dbops.get_user_type(dbops.conn, auth))
-    if dbops.get_user_type(dbops.conn, auth)[1]:
+    if dbops.get_user_type(dbops.conn, auth)[1] == "admin":
         admin = tk.Button(master=list_frame, text="Admin", width=8, command=delete_note)
         admin.pack(side=tk.LEFT)
     window.mainloop()
