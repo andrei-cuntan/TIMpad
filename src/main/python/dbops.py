@@ -1,3 +1,4 @@
+import bcrypt
 import mysql.connector
 conn = mysql.connector.connect(host="localhost", port=3306, user="root", passwd="")
 
@@ -16,18 +17,52 @@ def create_table(conn):
             "title VARCHAR(255) NOT NULL, " \
             "note VARCHAR(2000) NOT NULL)"
     mycursor.execute(query)
-
-
-def insert_note(conn, title, note):
+def create_users(conn):
+    create_db(conn)
     conn.database = "db_notes"
     mycursor = conn.cursor()
-    query = "INSERT INTO tb_notes (user_id, title, note) VALUES (1, %s, %s)"
-    val = (title, note)
+    query = "CREATE TABLE IF NOT EXISTS users (" \
+            "id INT AUTO_INCREMENT PRIMARY KEY, " \
+            "user VARCHAR(32) NOT NULL, " \
+            "type VARCHAR(32) NOT NULL, " \
+            "password VARCHAR(255) NOT NULL)"
+    mycursor.execute(query)
+
+
+def insert_note(conn, title, note, idx):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    query = "INSERT INTO tb_notes (user_id, title, note) VALUES (%d, %s, %s)"
+    val = (idx, title, note)
     mycursor.execute(query, val)
     conn.commit()
     return mycursor.lastrowid
-
-
+def insert_user(conn, user, pw, type):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    query = "INSERT INTO users (user, type, password) VALUES (%s, %s, %s)"
+    val = (user, type, bcrypt.hashpw(pw.encode('utf-8'), bcrypt.gensalt()))
+    mycursor.execute(query, val)
+    conn.commit()
+    return mycursor.lastrowid
+def get_user_type(conn, user):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    mycursor.execute("SELECT id, type FROM users WHERE user = '" + user + "'")
+    return mycursor.fetchone()
+def find_user(conn, user, pw):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    mycursor.execute("SELECT user, password, type FROM users WHERE user = '" + user + "'")
+    output = mycursor.fetchone()
+    print(output)
+    if str(output) != "None":
+        if bcrypt.checkpw(pw.encode('utf-8'), output[1].encode('utf-8')):
+            return output
+        else:
+            return "NULL"
+    else:
+        return "NULL"
 def update_note(conn, title, note, note_id, date):
     conn.database = "db_notes"
     mycursor = conn.cursor()
@@ -35,7 +70,13 @@ def update_note(conn, title, note, note_id, date):
     val = (title, note, date, note_id)
     mycursor.execute(query, val)
     conn.commit()
-
+def update_user(conn, user, pw):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    query = "UPDATE users SET password = %s WHERE user = %s"
+    val = (bcrypt.hashpw(pw.encode('utf-8'), bcrypt.gensalt()), user)
+    mycursor.execute(query, val)
+    conn.commit()
 
 def select_all_notes(conn):
     conn.database = "db_notes"
