@@ -76,6 +76,7 @@ def delete_text():
     title_box.delete(0, tk.END)
     text_box.delete('1.0', tk.END)
 def add_note():
+    global auth
     title = title_box.get()
     contents = text_box.get("1.0", tk.END)
     if title != "":
@@ -84,17 +85,21 @@ def add_note():
         status.config(text="Note added!")
     else:
         status.config(text="Note doesn't have a title")
+    dbops.insert_log(dbops.conn, auth, "added note")
 def save_note():
+    global auth
     if selected:
         title = title_box.get()
         contents = text_box.get("1.0", tk.END)
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         dbops.update_note(dbops.conn, title, contents, selected, now)
+        dbops.insert_log(dbops.conn, auth, "saved note")
         status.config(text="Note saved!")
     else:
         status.config(text="Note was not selected!")
+
 def delete_note():
-    global selected
+    global selected, auth
     if selected:
         delete_text()
         dbops.delete_note(dbops.conn, selected)
@@ -102,6 +107,7 @@ def delete_note():
         status.config(text="Note deleted!")
     else:
         status.config(text="Note was not selected!")
+    dbops.insert_log(dbops.conn, auth, "deleted note")
 def check_user():
     user = login_user_box.get()
     pw = login_pw_box.get()
@@ -110,6 +116,7 @@ def check_user():
     if output != "NULL":
         login_window.destroy()
         auth = user
+        dbops.insert_log(dbops.conn, auth, "logged in")
     else:
         login_msg.config(text="Incorrect credentials!")
 
@@ -122,8 +129,10 @@ def add_user():
     else:
         type = "user"
     dbops.insert_user(dbops.conn, user, pw, type)
+    dbops.insert_log(dbops.conn, user, "added user")
     login_window.destroy()
     auth = user
+# ======= ADMIN PANEL ========
 def admin_panel():
     def change_pass():
         user = login_user1_box.get()
@@ -151,7 +160,17 @@ def admin_panel():
     admin_out = tk.Button(admin_window, text="Close", command=admin_window.destroy)
     admin_out.pack(side=tk.RIGHT)
     admin_window.mainloop()
-
+def logs_panel():
+    logs_window = tk.Tk(className=' TIMpad admin panel')
+    logs_text_box = tk.Text(logs_window, width=75)
+    output = dbops.get_logs(dbops.conn)
+    for entry in output:
+        logs_text_box.insert('end', str(entry[2]) + ": " + entry[0] + " " + entry[1] + "\n")
+    logs_text_box.pack()
+    logs_out = tk.Button(logs_window, text="Close", command=logs_window.destroy)
+    logs_out.pack(side=tk.RIGHT)
+    logs_window.mainloop()
+# ======= LOGIN WINDOW ========
 login_window = tk.Tk(className=' TIMpad')
 login_window.geometry("300x150")
 user_frame = tk.Frame()
@@ -212,6 +231,8 @@ if auth != "":
     if dbops.get_user_type(dbops.conn, auth)[1] == "admin":
         admin = tk.Button(master=list_frame, text="Admin", width=8, command=admin_panel)
         admin.pack(side=tk.LEFT)
+        logs = tk.Button(master=list_frame, text="Logs", width=8, command=logs_panel)
+        logs.pack(side=tk.LEFT)
     window.mainloop()
 def helloworld(out):
     out.write("Hello world of Python\n")

@@ -1,4 +1,5 @@
 import bcrypt
+from datetime import datetime
 import mysql.connector
 conn = mysql.connector.connect(host="localhost", port=3306, user="root", passwd="")
 
@@ -85,6 +86,20 @@ def select_all_notes(conn):
     mycursor.execute(query)
     return mycursor.fetchall()
 
+def insert_log(conn, user, action):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    query = "INSERT INTO logs (user, action, timestamp) VALUES (%s, %s, %s)"
+    val = (user, action, now)
+    mycursor.execute(query, val)
+    conn.commit()
+    return mycursor.lastrowid
+def get_logs(conn):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    mycursor.execute("SELECT user, action, timestamp FROM logs")
+    return mycursor.fetchall()
 def delete_note(conn, note_id):
     conn.database = "db_notes"
     mycursor = conn.cursor()
