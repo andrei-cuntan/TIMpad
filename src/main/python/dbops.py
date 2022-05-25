@@ -45,6 +45,11 @@ def insert_user(conn, user, pw):
     mycursor.execute(query, val)
     conn.commit()
     return mycursor.lastrowid
+def get_user_type(conn, user):
+    conn.database = "db_notes"
+    mycursor = conn.cursor()
+    mycursor.execute("SELECT id, type FROM users WHERE user = '" + user + "'")
+    return mycursor.fetchone()
 def find_user(conn, user, pw):
     conn.database = "db_notes"
     mycursor = conn.cursor()

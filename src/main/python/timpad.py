@@ -6,9 +6,7 @@ note_id_list = []
 selected = 0
 bit1 = 0
 bit2 = 0
-auth = 0
-auth_user = ""
-auth_role = ""
+auth = ""
 # ======= FUNCTIONS ========
 # list box stuff
 def onselect(evt):
@@ -40,11 +38,12 @@ def sort_list(tup, pos, way):
 def update_list(notelist):
     list_box.delete(0, tk.END)
     for idx, note in enumerate(notelist):
-        list_box.insert(idx, str(note[4]) + " " + note[2])
-        if len(note_id_list) > idx:
-            note_id_list[idx] = note[0]
-        else:
-            note_id_list.append(note[0])
+        if dbops.get_user_type(dbops.conn, auth)[0] == note[1]:
+            list_box.insert(idx, str(note[4]) + " " + note[2])
+            if len(note_id_list) > idx:
+                note_id_list[idx] = note[0]
+            else:
+                note_id_list.append(note[0])
 def sort_name():
     notelist = dbops.select_all_notes(dbops.conn)
     global bit1
@@ -107,14 +106,10 @@ def check_user():
     user = login_user_box.get()
     pw = login_pw_box.get()
     global auth
-    global auth_user
-    global auth_role
     output = dbops.find_user(dbops.conn, user, pw)
     if output != "NULL":
         login_window.destroy()
-        auth = 1
-        auth_user = user;
-        auth_role = output[2]
+        auth = user
     else:
         login_msg.config(text="Incorrect credentials!")
 
@@ -137,13 +132,13 @@ out = tk.Button(login_window, text="Quit", command=login_window.destroy)
 out.pack(side=tk.BOTTOM)
 login_window.mainloop()
 # ======= USER INTERFACE ========
-if auth:
+if auth != "":
     window = tk.Tk()
     list_frame = tk.Frame()
     list_frame.pack(side=tk.LEFT)
     content_frame = tk.Frame()
     content_frame.pack(side=tk.RIGHT)
-    greeting = tk.Label(master=list_frame, text="Hello, " + auth_user)
+    greeting = tk.Label(master=list_frame, text="Hello, " + auth)
     greeting.pack()
     title_box = tk.Entry(master=content_frame, width=100)
     title_box.pack()
@@ -166,6 +161,10 @@ if auth:
     edit.pack(side=tk.LEFT)
     delete = tk.Button(master=list_frame, text="Delete", width=8, command=delete_note)
     delete.pack(side=tk.LEFT)
+    print(dbops.get_user_type(dbops.conn, auth))
+    if dbops.get_user_type(dbops.conn, auth)[1]:
+        admin = tk.Button(master=list_frame, text="Admin", width=8, command=delete_note)
+        admin.pack(side=tk.LEFT)
     window.mainloop()
 def helloworld(out):
     out.write("Hello world of Python\n")
